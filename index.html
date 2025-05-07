@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina la Fórmula</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .screen {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 850px; 
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .options-grid label {
+            display: block;
+            padding: 8px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .options-grid label:hover {
+            background-color: #ced4da;
+        }
+        .options-grid input[type="checkbox"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        select, button {
+            padding: 12px 18px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #adb5bd;
+            border-color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        #game-info {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        #game-area {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 20px;
+        }
+        
+        #canvas-container {
+            position: relative; 
+        }
+
+        canvas {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        #options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%; 
+            max-width: 300px; 
+        }
+        
+        @media (min-width: 800px) { 
+             #game-area {
+                flex-direction: row; 
+                align-items: flex-start; 
+            }
+            #options-container {
+                width: 280px; 
+                min-width: 250px;
+            }
+        }
+
+        .option-button {
+            width: 100%;
+            background-color: #f8f9fa;
+            color: #343a40;
+            border: 1px solid #ced4da;
+            text-align: left;
+            padding: 10px;
+            font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+        }
+        .option-button.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+        .option-button.correct {
+            background-color: #28a745;
+            color: white;
+            border-color: #1e7e34;
+        }
+        .option-button.incorrect {
+            background-color: #dc3545;
+            color: white;
+            border-color: #b02a37;
+        }
+
+        #feedback {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            min-height: 2em; 
+        }
+        .feedback-correct {
+            color: #28a745;
+        }
+        .feedback-incorrect {
+            color: #dc3545;
+        }
+        #final-score {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .equation-text { 
+            font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+            padding: 2px 5px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-menu-screen" class="screen">
+        <h1>Adivina la Fórmula</h1>
+        <h2>Selecciona Familias de Ecuaciones:</h2>
+        <div id="equation-family-selector" class="options-grid">
+            </div>
+        
+        <h2>Número de Preguntas:</h2>
+        <select id="num-questions-selector">
+            <option value="5">5 Preguntas</option>
+            <option value="10" selected>10 Preguntas</option>
+            <option value="15">15 Preguntas</option>
+            <option value="20">20 Preguntas</option>
+            <option value="25">25 Preguntas</option>
+        </select>
+        
+        <button id="start-game-button" disabled>Empezar Juego</button>
+    </div>
+
+    <div id="game-screen" class="screen" style="display:none;">
+        <div id="game-info">Pregunta X de Y | Puntuación: A/B</div>
+        <div id="game-area">
+            <div id="canvas-container">
+                <canvas id="plot-canvas" width="500" height="400"></canvas>
+            </div>
+            <div id="options-container">
+                </div>
+        </div>
+        <div id="controls-feedback-area">
+            <button id="confirm-answer-button" disabled>Confirmar Respuesta</button>
+            <div id="feedback"></div>
+            <button id="next-question-button" style="display:none;">Siguiente Pregunta</button>
+        </div>
+    </div>
+
+    <div id="end-screen" class="screen" style="display:none;">
+        <h1>¡Juego Terminado!</h1>
+        <div id="final-score">Tu puntuación final es: X/Y</div>
+        <button id="play-again-button">Jugar de Nuevo</button>
+    </div>
+
+    <script>
+        const mainMenuScreen = document.getElementById('main-menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+
+        const familySelectorContainer = document.getElementById('equation-family-selector');
+        const numQuestionsSelector = document.getElementById('num-questions-selector');
+        const startGameButton = document.getElementById('start-game-button');
+
+        const gameInfoDisplay = document.getElementById('game-info');
+        const canvas = document.getElementById('plot-canvas');
+        const ctx = canvas.getContext('2d');
+        const optionsContainer = document.getElementById('options-container');
+        const confirmAnswerButton = document.getElementById('confirm-answer-button');
+        const feedbackDisplay = document.getElementById('feedback');
+        const nextQuestionButton = document.getElementById('next-question-button');
+
+        const finalScoreDisplay = document.getElementById('final-score');
+        const playAgainButton = document.getElementById('play-again-button');
+
+        let currentScreen = 'menu';
+        let selectedFamilies = [];
+        let numQuestions = 10;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+        let currentMysteryFunction = null;
+        let currentOptions = [];
+        let selectedOptionElement = null;
+        let correctAnswerString = '';
+        let axisBounds = { xmin: -10, xmax: 10, ymin: -10, ymax: 10 };
+
+        // Function generators will now set familyName (Spanish) and familyId (programmatic)
+        // Helper function for Sine (not directly in equationFamilies array)
+        function generateSineHelper() { 
+            let a = randomChoice([-2,-1.5,-1,-0.5,0.5,1,1.5,2]);
+            let b = randomChoice([0.5, 1, 1.5, 2, Math.PI/2, Math.PI].map(val => formatNum(val, 2))); 
+            let d = randomInt(-3,3);
+            return {
+                func: x => a * Math.sin(b * x) + d,
+                string: `y = ${formatNum(a)}sin(${formatNum(b)}x) ${d >= 0 ? '+' : '-'} ${formatNum(Math.abs(d))}`,
+                coeffs: {a,b,d},
+                familyName: 'Seno', // Temporary, will be overridden by Trigonométrica
+                familyId: 'sine'     // Temporary
+            };
+        }
+        // Helper function for Cosine (not directly in equationFamilies array)
+        function generateCosineHelper() {
+            let a = randomChoice([-2,-1.5,-1,-0.5,0.5,1,1.5,2]);
+            let b = randomChoice([0.5, 1, 1.5, 2, Math.PI/2, Math.PI].map(val => formatNum(val, 2)));
+            let d = randomInt(-3,3);
+            return {
+                func: x => a * Math.cos(b * x) + d,
+                string: `y = ${formatNum(a)}cos(${formatNum(b)}x) ${d >= 0 ? '+' : '-'} ${formatNum(Math.abs(d))}`,
+                coeffs: {a,b,d},
+                familyName: 'Coseno', // Temporary
+                familyId: 'cosine'    // Temporary
+            };
+        }
+        
+        function generateTrigonometric() {
+            let baseFuncData;
+            if (Math.random() < 0.5) {
+                baseFuncData = generateSineHelper();
+            } else {
+                baseFuncData = generateCosineHelper();
+            }
+            return {
+                ...baseFuncData, 
+                familyName: 'Trigonométrica', // Override with combined family name
+                familyId: 'trigonometric'   // Override with combined family ID
+            };
+        }
+
+        const equationFamilies = [
+            { name: 'Lineal', id: 'linear', generator: generateLinear, defaultXRange: [-10, 10] },
+            { name: 'Cuadrática', id: 'quadratic', generator: generateQuadratic, defaultXRange: [-7, 7] },
+            { name: 'Cúbica', id: 'cubic', generator: generateCubic, defaultXRange: [-5, 5] },
+            { name: 'Valor Absoluto', id: 'absolute', generator: generateAbsolute, defaultXRange: [-7, 7] },
+            { name: 'Raíz Cuadrada', id: 'sqrt', generator: generateSqrt, defaultXRangeFn: () => [0, 15] },
+            { name: 'Exponencial', id: 'exponential', generator: generateExponential, defaultXRange: [-4, 4] },
+            { name: 'Logarítmica', id: 'logarithmic', generator: generateLogarithmic, defaultXRangeFn: () => [0.01, 10] },
+            { 
+                name: 'Trigonométrica', 
+                id: 'trigonometric', 
+                generator: generateTrigonometric, 
+                defaultXRangeFn: (coeffs) => { 
+                    const period = 2 * Math.PI / Math.abs(coeffs.b || 1); 
+                    return [-period, period];
+                } 
+            },
+        ];
+
+
+        // --- Utility Functions ---
+        function randomFloat(min, max, decimals = 2) {
+            const factor = Math.pow(10, decimals);
+            return Math.round((Math.random() * (max - min) + min) * factor) / factor;
+        }
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function randomChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        function formatNum(n, p = 2) { 
+            if (typeof n !== 'number') return n; 
+            const val = parseFloat(n.toFixed(p));
+            if (Object.is(val, -0)) return 0;
+            return val;
+        }
+        const htmlSup = (text) => `<sup>${text}</sup>`;
+        const htmlSub = (text) => `<sub>${text}</sub>`;
+
+        // --- Equation Generators (setting familyName and familyId) ---
+        function generateLinear() {
+            let a = randomChoice([-4,-3,-2,-1,-0.5, 0.5,1,2,3,4]);
+            let b = randomInt(-8, 8);
+            return {
+                func: x => a * x + b,
+                string: `y = ${formatNum(a)}x ${b >= 0 ? '+' : '-'} ${formatNum(Math.abs(b))}`,
+                coeffs: {a, b},
+                familyName: 'Lineal', familyId: 'linear'
+            };
+        }
+
+        function generateQuadratic() { 
+            let a = randomChoice([-2, -1, -0.5, -0.25, 0.25, 0.5, 1, 2]);
+            let k = randomInt(-10, 10);
+            return {
+                func: x => a * x * x + k,
+                string: `y = ${formatNum(a)}x${htmlSup('2')} ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                coeffs: {a, k},
+                familyName: 'Cuadrática', familyId: 'quadratic'
+            };
+        }
+        
+        function generateCubic() { 
+            let a = randomChoice([-0.5, -0.2, -0.1, 0.1, 0.2, 0.5]);
+            let d = randomInt(-5, 5);
+            return {
+                func: x => a * x*x*x + d,
+                string: `y = ${formatNum(a)}x${htmlSup('3')} ${d >= 0 ? '+' : '-'} ${formatNum(Math.abs(d))}`,
+                coeffs: {a,d},
+                familyName: 'Cúbica', familyId: 'cubic'
+            };
+        }
+
+        function generateAbsolute() { 
+            let a = randomChoice([-3,-2,-1,-0.5,0.5,1,2,3]);
+            let k = randomInt(-5, 5);
+            return {
+                func: x => a * Math.abs(x) + k,
+                string: `y = ${formatNum(a)}|x| ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                coeffs: {a,k},
+                familyName: 'Valor Absoluto', familyId: 'absolute'
+            };
+        }
+
+        function generateSqrt() { 
+            let a = randomChoice([-3,-2,-1,1,2,3]);
+            let k = randomInt(-5, 5);
+            return {
+                func: x => {
+                    if (x < 0) return NaN;
+                    return a * Math.sqrt(x) + k;
+                },
+                string: `y = ${formatNum(a)}√x ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                coeffs: {a,k},
+                familyName: 'Raíz Cuadrada', familyId: 'sqrt'
+            };
+        }
+        
+        function generateExponential() { 
+            let a = randomChoice([-2,-1,-0.5,0.5,1,2]);
+            let b = randomChoice([0.5, 0.7, 1.5, 1.8, 2]); 
+            let c = randomInt(-5,5);
+            return {
+                func: x => a * Math.pow(b, x) + c,
+                string: `y = ${formatNum(a)} * ${formatNum(b)}${htmlSup('x')} ${c >= 0 ? '+' : '-'} ${formatNum(Math.abs(c))}`,
+                coeffs: {a,b,c},
+                familyName: 'Exponencial', familyId: 'exponential'
+            };
+        }
+
+        function generateLogarithmic() { 
+            let a = randomChoice([-2,-1,-0.5,0.5,1,2]);
+            let base = randomChoice([2, Math.E, 3, 10]); 
+            let k = randomInt(-5, 5);
+            const baseStr = base === Math.E ? 'e' : formatNum(base,1);
+            return {
+                func: x => {
+                    if (x <= 0) return NaN;
+                    if (base === Math.E) return a * Math.log(x) + k; // Math.log is natural log (ln)
+                    return a * (Math.log(x) / Math.log(base)) + k;
+                },
+                string: `y = ${formatNum(a)}${base === Math.E ? 'ln' : 'log'}${htmlSub(base === Math.E ? '' : baseStr)}(x) ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                coeffs: {a,base,k},
+                familyName: 'Logarítmica', familyId: 'logarithmic'
+            };
+        }
+        // generateSine and generateCosine are now helpers, called by generateTrigonometric.
+        // generateTrigonometric is in equationFamilies and sets final familyName/familyId.
+
+        // --- Game Logic ---
+        function populateFamilySelector() {
+            familySelectorContainer.innerHTML = '';
+            equationFamilies.forEach(family => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = family.id; // Use id for value
+                checkbox.checked = true; 
+                checkbox.addEventListener('change', updateStartButtonState);
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(" " + family.name)); // Use name for display
+                familySelectorContainer.appendChild(label);
+            });
+            updateStartButtonState(); 
+        }
+
+        function updateStartButtonState() {
+            selectedFamilies = Array.from(familySelectorContainer.querySelectorAll('input[type="checkbox"]:checked'))
+                                  .map(cb => cb.value); // value is the family.id
+            startGameButton.disabled = selectedFamilies.length === 0;
+        }
+
+        function generateDistractors(correctFuncData, allSelectedFamilyIds) {
+            const distractors = [];
+            const attemptsLimit = 30; 
+            let attempts = 0;
+
+            const correctFamilyId = correctFuncData.familyId; // Use familyId here
+            const sameFamilyDetails = equationFamilies.find(f => f.id === correctFamilyId);
+
+            if (sameFamilyDetails) {
+                for (let i = 0; i < 2 && distractors.length < 4 && attempts < attemptsLimit; attempts++) {
+                    const distractor = sameFamilyDetails.generator(); // This will have its own familyId
+                    if (distractor.string !== correctFuncData.string && !distractors.some(d => d.string === distractor.string)) {
+                        distractors.push(distractor);
+                    }
+                }
+            }
+            
+            const otherFamilyIds = allSelectedFamilyIds.filter(fid => fid !== correctFamilyId);
+            const availableOtherFamilies = equationFamilies.filter(f => otherFamilyIds.includes(f.id));
+
+            while (distractors.length < 4 && attempts < attemptsLimit) {
+                let familyToUseDetails;
+                if (availableOtherFamilies.length > 0 && (Math.random() < 0.7 || !sameFamilyDetails)) {
+                    familyToUseDetails = randomChoice(availableOtherFamilies);
+                } else if (sameFamilyDetails) {
+                    familyToUseDetails = sameFamilyDetails;
+                } else { 
+                    familyToUseDetails = randomChoice(equationFamilies.filter(f => allSelectedFamilyIds.includes(f.id))) || randomChoice(equationFamilies);
+                }
+                
+                if (!familyToUseDetails) { attempts++; continue; } 
+
+                const distractor = familyToUseDetails.generator();
+                if (distractor.string !== correctFuncData.string && !distractors.some(d => d.string === distractor.string)) {
+                    distractors.push(distractor);
+                }
+                attempts++;
+            }
+            while(distractors.length < 4 && attempts < attemptsLimit * 2) {
+                 const fallbackFamilyDetails = randomChoice(equationFamilies.filter(f => allSelectedFamilyIds.includes(f.id))) || randomChoice(equationFamilies);
+                 if (!fallbackFamilyDetails) break;
+                 const distractor = fallbackFamilyDetails.generator();
+                 if (!distractors.some(d => d.string === distractor.string) && distractor.string !== correctFuncData.string) {
+                    distractors.push(distractor);
+                 }
+                 attempts++;
+            }
+            return distractors.slice(0,4);
+        }
+
+
+        function generateQuestions() {
+            questions = [];
+            const availableFamilyObjects = equationFamilies.filter(f => selectedFamilies.includes(f.id));
+            if(availableFamilyObjects.length === 0) {
+                alert("Por favor, selecciona al menos una familia de ecuaciones para empezar el juego.");
+                return;
+            }
+
+            for (let i = 0; i < numQuestions; i++) {
+                const familyDetails = randomChoice(availableFamilyObjects); // This is {name, id, generator,...}
+                const mysteryFuncData = familyDetails.generator(); // This now contains familyName and familyId
+                
+                const distractors = generateDistractors(mysteryFuncData, selectedFamilies);
+                 while(distractors.length < 4) { // Ensure 4 distractors
+                    const fillFamily = randomChoice(availableFamilyObjects) || randomChoice(equationFamilies);
+                    const dFill = fillFamily.generator();
+                    if (!distractors.some(d => d.string === dFill.string) && dFill.string !== mysteryFuncData.string) {
+                        distractors.push(dFill);
+                    }
+                }
+                
+                const options = [mysteryFuncData, ...distractors.slice(0,4)];
+                shuffleArray(options);
+                
+                questions.push({
+                    mysteryFunctionData: mysteryFuncData,
+                    options: options,
+                    correctAnswerString: mysteryFuncData.string,
+                    // familyDetails is still the object from equationFamilies, used for defaultXRange etc.
+                    // mysteryFuncData.familyId and mysteryFuncData.familyName are inside mysteryFunctionData.
+                    familyDetailsForBounds: familyDetails 
+                });
+            }
+        }
+        
+        function calculateAxisBounds(mysteryFuncData, options, familyDetailsForBounds) {
+            const functionsToConsider = [mysteryFuncData, ...options.filter(opt => opt && typeof opt.func === 'function')];
+            
+            let xDataMin, xDataMax;
+            // Use familyDetailsForBounds (the original object from equationFamilies) for default ranges
+            if (typeof familyDetailsForBounds.defaultXRangeFn === 'function') {
+                [xDataMin, xDataMax] = familyDetailsForBounds.defaultXRangeFn(mysteryFuncData.coeffs);
+            } else {
+                [xDataMin, xDataMax] = familyDetailsForBounds.defaultXRange || [-10, 10];
+            }
+
+            if (xDataMin >= xDataMax) { 
+                xDataMin = -5; xDataMax = 5; 
+                if (familyDetailsForBounds.id === 'sqrt' ) { xDataMin = 0; xDataMax = 10; }
+                if (familyDetailsForBounds.id === 'logarithmic') { xDataMin = 0.01; xDataMax = 10; }
+            }
+
+            let allYValues = [];
+            const numSamplePoints = 200;
+            const dxInitial = (xDataMax - xDataMin) / numSamplePoints;
+
+            for (const funcData of functionsToConsider) {
+                if (!funcData || typeof funcData.func !== 'function') continue;
+                for (let i = 0; i <= numSamplePoints; i++) {
+                    const x = xDataMin + i * dxInitial;
+                    try {
+                        const y = funcData.func(x);
+                        if (!isNaN(y) && isFinite(y)) {
+                            allYValues.push(y);
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+            }
+            
+            if (allYValues.length === 0) allYValues = [-5, 5]; 
+
+            let yDataMin = Math.min(...allYValues);
+            let yDataMax = Math.max(...allYValues);
+
+            if (yDataMin === yDataMax) { yDataMin -= 1; yDataMax += 1; }
+
+            const paddingFactor = 0.15; 
+            let currentXSpan = xDataMax - xDataMin;
+            let currentYSpan = yDataMax - yDataMin;
+
+            let xSpanDataPadded = currentXSpan === 0 ? 2 * (1 + 2 * paddingFactor) : currentXSpan * (1 + 2 * paddingFactor);
+            let ySpanDataPadded = currentYSpan === 0 ? 2 * (1 + 2 * paddingFactor) : currentYSpan * (1 + 2 * paddingFactor);
+            
+            const xDataCenter = (xDataMin + xDataMax) / 2;
+            const yDataCenter = (yDataMin + yDataMax) / 2;
+            
+            const canvasAspectRatio = canvas.width / canvas.height;
+            
+            let finalXSpan = xSpanDataPadded;
+            let finalYSpan = ySpanDataPadded;
+
+            if (finalXSpan / finalYSpan > canvasAspectRatio) { 
+                finalYSpan = finalXSpan / canvasAspectRatio;
+            } else { 
+                finalXSpan = finalYSpan * canvasAspectRatio;
+            }
+            
+            axisBounds = {
+                xmin: xDataCenter - finalXSpan / 2,
+                xmax: xDataCenter + finalXSpan / 2,
+                ymin: yDataCenter - finalYSpan / 2,
+                ymax: yDataCenter + finalYSpan / 2,
+            };
+        }
+
+        function calculateNiceTicks(minVal, maxVal, maxTicks = 8) {
+            const range = maxVal - minVal;
+            if (range === 0 || !isFinite(range)) return { ticks: [minVal], step: 0 };
+
+            const roughStep = range / Math.max(1, (maxTicks - 1));
+            if (roughStep === 0 || !isFinite(roughStep)) return {ticks: [minVal, maxVal], step: range};
+
+            const exponent = Math.floor(Math.log10(roughStep));
+            const magnitude = Math.pow(10, exponent);
+            const possibleStepsMultipliers = [1, 2, 2.5, 5, 10]; 
+            
+            let niceStep = possibleStepsMultipliers[possibleStepsMultipliers.length-1] * magnitude;
+
+            for(let pStep of possibleStepsMultipliers) {
+                if (pStep * magnitude >= roughStep) {
+                    niceStep = pStep * magnitude;
+                    break;
+                }
+            }
+            if (niceStep === 0) niceStep = magnitude > 0 ? magnitude : 1;
+
+            const firstTick = Math.floor(minVal / niceStep) * niceStep;
+            const ticks = [];
+            let currentTick = firstTick;
+            
+            const safetyMaxTicks = maxTicks * 3; 
+            while (currentTick < maxVal + niceStep * 0.1 && ticks.length < safetyMaxTicks) {
+                ticks.push(parseFloat(currentTick.toFixed(10))); 
+                currentTick += niceStep;
+                 if (niceStep === 0) break; 
+            }
+            if (ticks.length === 0 && isFinite(minVal) && isFinite(maxVal)) {
+                 ticks.push(formatNum(minVal), formatNum(maxVal));
+            }
+
+
+            return { ticks, step: niceStep };
+        }
+
+
+        function renderAxis() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '10px Arial';
+
+            const { xmin, xmax, ymin, ymax } = axisBounds;
+            if (![xmin, xmax, ymin, ymax].every(val => typeof val === 'number' && isFinite(val))) {
+                axisBounds = { xmin: -10, xmax: 10, ymin: -10, ymax: 10 }; 
+            }
+            
+            const numXTicks = Math.max(3, Math.min(10, Math.floor(canvas.width / 60)));
+            const numYTicks = Math.max(3, Math.min(8, Math.floor(canvas.height / 50)));
+
+            const xTicksData = calculateNiceTicks(axisBounds.xmin, axisBounds.xmax, numXTicks);
+            const yTicksData = calculateNiceTicks(axisBounds.ymin, axisBounds.ymax, numYTicks);
+
+            const toCanvasX = (mathX) => (mathX - axisBounds.xmin) / (axisBounds.xmax - axisBounds.xmin) * canvas.width;
+            const toCanvasY = (mathY) => canvas.height - (mathY - axisBounds.ymin) / (axisBounds.ymax - axisBounds.ymin) * canvas.height;
+
+            ctx.strokeStyle = '#eee';
+            ctx.lineWidth = 1;
+            xTicksData.ticks.forEach(tick => {
+                const xPos = toCanvasX(tick);
+                if(xPos >=0 && xPos <= canvas.width && isFinite(xPos)){
+                    ctx.beginPath(); ctx.moveTo(xPos, 0); ctx.lineTo(xPos, canvas.height); ctx.stroke();
+                }
+            });
+            yTicksData.ticks.forEach(tick => {
+                const yPos = toCanvasY(tick);
+                 if(yPos >=0 && yPos <= canvas.height && isFinite(yPos)){
+                    ctx.beginPath(); ctx.moveTo(0, yPos); ctx.lineTo(canvas.width, yPos); ctx.stroke();
+                 }
+            });
+            
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1.5;
+            if (axisBounds.ymin <= 0 && axisBounds.ymax >= 0) { 
+                const yZero = toCanvasY(0);
+                if(isFinite(yZero)) {ctx.beginPath(); ctx.moveTo(0, yZero); ctx.lineTo(canvas.width, yZero); ctx.stroke();}
+            }
+            if (axisBounds.xmin <= 0 && axisBounds.xmax >= 0) { 
+                const xZero = toCanvasX(0);
+                if(isFinite(xZero)) {ctx.beginPath(); ctx.moveTo(xZero, 0); ctx.lineTo(xZero, canvas.height); ctx.stroke();}
+            }
+
+            ctx.fillStyle = '#555';
+            const yAxisCanvasPos = toCanvasY(0); 
+            
+            ctx.textAlign = 'center';
+            xTicksData.ticks.forEach(tick => {
+                const xPos = toCanvasX(tick);
+                if(!isFinite(xPos)) return;
+                let labelTextY = yAxisCanvasPos + 5; 
+                ctx.textBaseline = 'top';
+
+                if (yAxisCanvasPos > canvas.height - 15) { 
+                    labelTextY = canvas.height - 2; ctx.textBaseline = 'bottom';
+                } else if (yAxisCanvasPos < 15) { 
+                    labelTextY = 2; ctx.textBaseline = 'top';
+                }
+                if(xPos >=-10 && xPos <= canvas.width + 10) { // Allow slightly off-canvas to catch edges
+                    ctx.fillText(formatNum(tick, tick.toString().includes('.') ? 1 : 0), xPos, labelTextY);
+                }
+            });
+
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            const xAxisCanvasPos = toCanvasX(0); 
+            yTicksData.ticks.forEach(tick => {
+                const yPos = toCanvasY(tick);
+                if(!isFinite(yPos)) return;
+                let labelTextX = xAxisCanvasPos - 5;
+
+                if (xAxisCanvasPos < 25) { // Increased threshold for switching alignment
+                    labelTextX = 5; ctx.textAlign = 'left';
+                } else if (xAxisCanvasPos > canvas.width - 25) {
+                    labelTextX = canvas.width - 5; ctx.textAlign = 'right';
+                } else {
+                    ctx.textAlign = 'right'; // Default for y-axis labels left of axis
+                }
+                 if(yPos >= -10 && yPos <= canvas.height + 10){ 
+                    ctx.fillText(formatNum(tick, tick.toString().includes('.') ? 1 : 0), labelTextX, yPos);
+                 }
+            });
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+
+        function plotFunction(func, color) {
+            const { xmin, xmax, ymin, ymax } = axisBounds;
+            if (![xmin, xmax, ymin, ymax].every(val => typeof val === 'number' && isFinite(val))) return;
+
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5; 
+
+            const plotSteps = canvas.width * 2; 
+            const dx = (xmax - xmin) / plotSteps;
+            if (dx === 0 || !isFinite(dx)) return; // Avoid infinite loops or NaN issues
+
+            let firstPoint = true;
+
+            for (let i = 0; i <= plotSteps; i++) {
+                const mathX = xmin + i * dx;
+                let mathY;
+                try { mathY = func(mathX); } catch(e) { mathY = NaN; }
+                
+                const yRangePlot = (ymax - ymin);
+                if (isNaN(mathY) || !isFinite(mathY) || mathY < ymin - yRangePlot || mathY > ymax + yRangePlot) { 
+                    firstPoint = true; 
+                    continue;
+                }
+
+                const canvasX = (mathX - xmin) / (xmax - xmin) * canvas.width;
+                const canvasY = canvas.height - (mathY - ymin) / (ymax - ymin) * canvas.height;
+                
+                 if (!isFinite(canvasX) || !isFinite(canvasY)) { // Additional check for canvas coords
+                    firstPoint = true;
+                    continue;
+                }
+
+                if (firstPoint) {
+                    ctx.moveTo(canvasX, canvasY);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+        }
+
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const questionData = questions[index];
+            currentMysteryFunction = questionData.mysteryFunctionData.func;
+            correctAnswerString = questionData.correctAnswerString;
+            currentOptions = questionData.options;
+
+            gameInfoDisplay.textContent = `Pregunta ${index + 1} de ${numQuestions} | Puntuación: ${score}/${index}`;
+            
+            calculateAxisBounds(questionData.mysteryFunctionData, questionData.options, questionData.familyDetailsForBounds);
+            renderAxis();
+            plotFunction(currentMysteryFunction, 'blue');
+
+            optionsContainer.innerHTML = '';
+            currentOptions.forEach(opt => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.innerHTML = opt.string; 
+                button.dataset.equation = opt.string; 
+                button.addEventListener('click', () => selectOption(button, opt));
+                optionsContainer.appendChild(button);
+            });
+
+            confirmAnswerButton.disabled = true;
+            nextQuestionButton.style.display = 'none';
+            feedbackDisplay.textContent = '';
+            feedbackDisplay.className = '';
+            selectedOptionElement = null;
+            document.getElementById('canvas-container').style.visibility = 'visible';
+            optionsContainer.style.visibility = 'visible';
+        }
+
+        function selectOption(buttonElement, optionData) {
+            if (selectedOptionElement) {
+                selectedOptionElement.classList.remove('selected');
+            }
+            selectedOptionElement = buttonElement;
+            selectedOptionElement.classList.add('selected');
+            confirmAnswerButton.disabled = false;
+        }
+
+        function confirmAnswer() {
+            if (!selectedOptionElement) return;
+
+            const selectedEquationString = selectedOptionElement.dataset.equation;
+            const chosenOptionData = currentOptions.find(opt => opt.string === selectedEquationString);
+
+            if (chosenOptionData && typeof chosenOptionData.func === 'function') {
+                 plotFunction(chosenOptionData.func, '#FF0000'); 
+            }
+
+            optionsContainer.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = true; 
+                if (btn.dataset.equation === correctAnswerString) {
+                    btn.classList.add('correct'); 
+                }
+            });
+
+            if (selectedEquationString === correctAnswerString) {
+                score++;
+                feedbackDisplay.textContent = "¡Correcto!";
+                feedbackDisplay.className = 'feedback-correct';
+                if (selectedOptionElement) selectedOptionElement.classList.add('correct');
+
+            } else {
+                feedbackDisplay.innerHTML = `Incorrecto. La respuesta correcta era: <span class="equation-text">${correctAnswerString}</span>`;
+                feedbackDisplay.className = 'feedback-incorrect';
+                 if (selectedOptionElement) {
+                    selectedOptionElement.classList.remove('selected');
+                    selectedOptionElement.classList.add('incorrect'); 
+                 }
+            }
+            
+            gameInfoDisplay.textContent = `Pregunta ${currentQuestionIndex + 1} de ${numQuestions} | Puntuación: ${score}/${currentQuestionIndex + 1}`;
+            confirmAnswerButton.disabled = true;
+            nextQuestionButton.style.display = 'inline-block';
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < numQuestions - 1) {
+                loadQuestion(currentQuestionIndex + 1);
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            finalScoreDisplay.textContent = `Tu puntuación final es: ${score}/${numQuestions}`;
+            showScreen('end');
+        }
+
+        function showScreen(screenId) {
+            mainMenuScreen.style.display = 'none';
+            gameScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            const targetScreen = document.getElementById(screenId + '-screen');
+            if (targetScreen) {
+                targetScreen.style.display = 'block';
+            }
+            currentScreen = screenId;
+        }
+        
+        function resetGame() {
+            score = 0;
+            currentQuestionIndex = 0;
+            questions = [];
+            populateFamilySelector(); 
+        }
+
+        startGameButton.addEventListener('click', () => {
+            numQuestions = parseInt(numQuestionsSelector.value);
+            generateQuestions();
+            if (questions.length > 0) {
+                loadQuestion(0);
+                showScreen('game');
+            }
+        });
+
+        confirmAnswerButton.addEventListener('click', confirmAnswer);
+        nextQuestionButton.addEventListener('click', nextQuestion);
+        playAgainButton.addEventListener('click', () => {
+            resetGame();
+            showScreen('main-menu');
+        });
+
+        populateFamilySelector(); 
+        showScreen('main-menu');
+    </script>
+</body>
+</html>
