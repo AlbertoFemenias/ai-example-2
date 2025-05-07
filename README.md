@@ -9,26 +9,28 @@ https://albertofemenias.github.io/ai-example-2/
 Ask the following to ChatGPT:
 
 ```
-Crea un juego interactivo en un solo archivo HTML llamado 'Adivina la Fórmula'. El juego debe estar completamente en español y consistirá en un quiz donde el usuario debe identificar la ecuación matemática que corresponde a un gráfico mostrado.
+¡Hola! Necesito tu ayuda para crear un juego web llamado "Adivina la Fórmula", todo en español. Sería un juego para que los estudiantes practiquen identificando fórmulas matemáticas a partir de sus gráficos.
 
-Requisitos principales:
+La idea general es:
 
-1.  Título y Lenguaje: El juego se llamará "Adivina la Fórmula" y toda la interfaz de usuario estará en español.
-2.  Estructura del Juego:
-    * Menú Principal: Permitir seleccionar familias de ecuaciones a incluir en el quiz (todas seleccionadas por defecto) y el número de preguntas (ej: 5, 10, 15). Botón "Empezar Juego".
-    * Pantalla de Juego: Mostrar el número de pregunta actual y la puntuación. Un canvas HTML para dibujar el gráfico de la función misteriosa. A la derecha, una lista vertical de 5 botones con ecuaciones como opciones de respuesta múltiple. Un botón "Confirmar Respuesta" y luego "Siguiente Pregunta".
-    * Pantalla Final: Mostrar el mensaje "¡Juego Terminado!", la puntuación final y un botón "Jugar de Nuevo".
-3.  Familias de Ecuaciones y Fórmulas:
-    * Incluir las siguientes familias: Lineal (`y=ax+b`), Cuadrática (`y=ax²+k`), Cúbica (`y=ax³+d`), Valor Absoluto (`y=a|x|+k`), Raíz Cuadrada (`y=a√x+k`), Exponencial (`y=abˣ+c`), Logarítmica (`y=a log_{base}(x)+k` o `y=a ln(x)+k`), y Trigonométrica (combinando Seno `y=asin(bx)+d` y Coseno `y=acos(bx)+d` en una sola familia).
-    * Importante: Las fórmulas deben ser simplificadas, conteniendo como máximo un término constante que sume o reste (como se indica en los ejemplos).
-4.  Graficación en Canvas:
-    * El eje de coordenadas cartesianas debe ajustarse dinámicamente para cada pregunta, asegurando que el gráfico de la función misteriosa y todas las opciones se visualicen correctamente.
-    * Proporción de Ejes: Los ejes X e Y deben mantener una proporción 1:1 en sus unidades (escalado "cuadrado"), es decir, un cambio de 1 unidad en X debe representar la misma distancia visual que 1 unidad en Y.
-    * Incluir marcas de graduación (ticks) y etiquetas numéricas visibles y autoescaladas en los ejes. Las etiquetas del eje X deben aparecer justo debajo de la línea del eje.
-    * La función misteriosa se dibujará en un color (ej: azul). Al confirmar, la función seleccionada por el usuario se dibujará en otro color (ej: rojo).
-5.  Interfaz y Experiencia:
-    * Diseño limpio, minimalista y funcional.
-    * Feedback visual y textual (ej: "¡Correcto!", "Incorrecto. La respuesta correcta era: ..."). Colores distintivos para correcto/incorrecto.
-    * Ecuaciones mostradas de forma legible (usar `<sup>`, `<sub>`, `√` según sea necesario).
-6.  Archivo Único: Todo el código (HTML, CSS, JavaScript) debe estar contenido en un único archivo `.html` sin dependencias externas (excepto APIs estándar del navegador como Canvas y Math).
+Inicio fácil: Una pantalla para que elijan qué tipos de fórmulas quieren y cuántas preguntas. Y un botón para "Empezar".
+
+Al jugar:
+  - Se muestra un gráfico misterioso (en azul).
+  - Al lado, 5 botones con posibles fórmulas. El estudiante elige una.
+  - Al confirmar, el juego dice si es "¡Correcto!" o "Incorrecto" (mostrando la respuesta buena si falló). También, que se dibuje la fórmula elegida por el estudiante (en rojo) sobre el mismo gráfico, para que pueda comparar.
+  - Arriba se vería el número de pregunta y la puntuación. Luego, un botón para "Siguiente".
+
+Final del juego: 
+  - Un mensaje de "¡Juego Terminado!", la puntuación final y un botón para "Jugar de Nuevo".
+
+Tipos de fórmulas: 
+  - Que haya variedad, como líneas rectas (y=ax+b), parábolas (y=ax²+k), con forma de V (y=a|x|+k), raíces (y=a√x+k), exponenciales, logarítmicas y ondas (trigonométricas como y=asen(bx)+d). Lo importante es que sean fórmulas sencillas, más o menos con un solo número que sume o reste al final.
+
+Dibujo de los Gráficos:
+  - Que los ejes X e Y se ajusten solos para que el gráfico siempre se vea bien.
+  - Que las unidades en el eje X y en el eje Y se vean del mismo tamaño (que la escala sea "cuadrada").
+  - Que los ejes tengan sus rayitas y números. Los números del eje X, que aparezcan justo debajo de la línea del eje.
+
+Si es posible, que todo el juego (código, estilos, todo) esté en un solo archivo HTML.
 ```
