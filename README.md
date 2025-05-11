@@ -1,5 +1,5 @@
 # ai-example-2
-Educational videogame created with just AI prompts.
+Educational math quiz created with just AI prompts.
 
 This one is about an guessing the math formula plotted.
 
