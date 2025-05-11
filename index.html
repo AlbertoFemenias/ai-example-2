@@ -24,7 +24,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 90%;
-            max-width: 850px; 
+            max-width: 850px;
         }
 
         h1, h2 {
@@ -97,13 +97,13 @@
 
         #game-area {
             display: flex;
-            flex-direction: column; 
+            flex-direction: column;
             align-items: center;
             gap: 20px;
         }
-        
+       
         #canvas-container {
-            position: relative; 
+            position: relative;
         }
 
         canvas {
@@ -116,17 +116,17 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            width: 100%; 
-            max-width: 300px; 
+            width: 100%;
+            max-width: 300px;
         }
-        
-        @media (min-width: 800px) { 
+       
+        @media (min-width: 800px) {
              #game-area {
-                flex-direction: row; 
-                align-items: flex-start; 
+                flex-direction: row;
+                align-items: flex-start;
             }
             #options-container {
-                width: 280px; 
+                width: 280px;
                 min-width: 250px;
             }
         }
@@ -160,7 +160,7 @@
             margin-top: 15px;
             font-size: 16px;
             font-weight: bold;
-            min-height: 2em; 
+            min-height: 2em;
         }
         .feedback-correct {
             color: #28a745;
@@ -172,7 +172,7 @@
             font-size: 20px;
             margin-bottom: 20px;
         }
-        .equation-text { 
+        .equation-text {
             font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
             padding: 2px 5px;
             background-color: #e9ecef;
@@ -188,7 +188,7 @@
         <h2>Selecciona Familias de Ecuaciones:</h2>
         <div id="equation-family-selector" class="options-grid">
             </div>
-        
+       
         <h2>Número de Preguntas:</h2>
         <select id="num-questions-selector">
             <option value="5">5 Preguntas</option>
@@ -197,7 +197,7 @@
             <option value="20">20 Preguntas</option>
             <option value="25">25 Preguntas</option>
         </select>
-        
+       
         <button id="start-game-button" disabled>Empezar Juego</button>
     </div>
 
@@ -255,34 +255,33 @@
         let correctAnswerString = '';
         let axisBounds = { xmin: -10, xmax: 10, ymin: -10, ymax: 10 };
 
-        // Function generators will now set familyName (Spanish) and familyId (programmatic)
-        // Helper function for Sine (not directly in equationFamilies array)
-        function generateSineHelper() { 
+        function generateSineHelper() {
             let a = randomChoice([-2,-1.5,-1,-0.5,0.5,1,1.5,2]);
-            let b = randomChoice([0.5, 1, 1.5, 2, Math.PI/2, Math.PI].map(val => formatNum(val, 2))); 
+            let b = randomChoice([0.5, 1, 1.5, 2, Math.PI/2, Math.PI].map(val => formatNum(val, 2)));
             let d = randomInt(-3,3);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
             return {
                 func: x => a * Math.sin(b * x) + d,
-                string: `y = ${formatNum(a)}sin(${formatNum(b)}x) ${d >= 0 ? '+' : '-'} ${formatNum(Math.abs(d))}`,
+                string: `y = ${str_a}sin(${formatNum(b)}x) ${d === 0 ? '' : (d > 0 ? `+ ${formatNum(Math.abs(d))}` : `- ${formatNum(Math.abs(d))}`)}`.trim(),
                 coeffs: {a,b,d},
-                familyName: 'Seno', // Temporary, will be overridden by Trigonométrica
-                familyId: 'sine'     // Temporary
+                familyName: 'Seno',
+                familyId: 'sine'
             };
         }
-        // Helper function for Cosine (not directly in equationFamilies array)
         function generateCosineHelper() {
             let a = randomChoice([-2,-1.5,-1,-0.5,0.5,1,1.5,2]);
             let b = randomChoice([0.5, 1, 1.5, 2, Math.PI/2, Math.PI].map(val => formatNum(val, 2)));
             let d = randomInt(-3,3);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
             return {
                 func: x => a * Math.cos(b * x) + d,
-                string: `y = ${formatNum(a)}cos(${formatNum(b)}x) ${d >= 0 ? '+' : '-'} ${formatNum(Math.abs(d))}`,
+                string: `y = ${str_a}cos(${formatNum(b)}x) ${d === 0 ? '' : (d > 0 ? `+ ${formatNum(Math.abs(d))}` : `- ${formatNum(Math.abs(d))}`)}`.trim(),
                 coeffs: {a,b,d},
-                familyName: 'Coseno', // Temporary
-                familyId: 'cosine'    // Temporary
+                familyName: 'Coseno',
+                familyId: 'cosine'
             };
         }
-        
+       
         function generateTrigonometric() {
             let baseFuncData;
             if (Math.random() < 0.5) {
@@ -291,9 +290,9 @@
                 baseFuncData = generateCosineHelper();
             }
             return {
-                ...baseFuncData, 
-                familyName: 'Trigonométrica', // Override with combined family name
-                familyId: 'trigonometric'   // Override with combined family ID
+                ...baseFuncData,
+                familyName: 'Trigonométrica',
+                familyId: 'trigonometric'
             };
         }
 
@@ -305,14 +304,14 @@
             { name: 'Raíz Cuadrada', id: 'sqrt', generator: generateSqrt, defaultXRangeFn: () => [0, 15] },
             { name: 'Exponencial', id: 'exponential', generator: generateExponential, defaultXRange: [-4, 4] },
             { name: 'Logarítmica', id: 'logarithmic', generator: generateLogarithmic, defaultXRangeFn: () => [0.01, 10] },
-            { 
-                name: 'Trigonométrica', 
-                id: 'trigonometric', 
-                generator: generateTrigonometric, 
-                defaultXRangeFn: (coeffs) => { 
-                    const period = 2 * Math.PI / Math.abs(coeffs.b || 1); 
+            {
+                name: 'Trigonométrica',
+                id: 'trigonometric',
+                generator: generateTrigonometric,
+                defaultXRangeFn: (coeffs) => {
+                    const period = 2 * Math.PI / Math.abs(coeffs.b || 1);
                     return [-period, period];
-                } 
+                }
             },
         ];
 
@@ -334,8 +333,8 @@
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-        function formatNum(n, p = 2) { 
-            if (typeof n !== 'number') return n; 
+        function formatNum(n, p = 2) {
+            if (typeof n !== 'number') return n;
             const val = parseFloat(n.toFixed(p));
             if (Object.is(val, -0)) return 0;
             return val;
@@ -345,93 +344,169 @@
 
         // --- Equation Generators (setting familyName and familyId) ---
         function generateLinear() {
-            let a = randomChoice([-4,-3,-2,-1,-0.5, 0.5,1,2,3,4]);
+            let a = randomChoice([-4,-3,-2,-1,-0.5, 0.5,1,2,3,4].map(v=>formatNum(v,1)));
             let b = randomInt(-8, 8);
+            
+            let str_a_part = "";
+            if (a === 1) str_a_part = "x";
+            else if (a === -1) str_a_part = "-x";
+            else if (a !== 0) str_a_part = `${formatNum(a)}x`;
+            // if a is 0, str_a_part remains ""
+
+            let str_b_part = "";
+            if (b > 0) str_b_part = `+ ${formatNum(b)}`;
+            else if (b < 0) str_b_part = `- ${formatNum(Math.abs(b))}`;
+            // if b is 0, str_b_part remains ""
+
+            let final_string = "y = ";
+            if (str_a_part !== "") {
+                final_string += str_a_part;
+                if (str_b_part !== "" && b > 0) final_string += ` ${str_b_part}`; // Add space if a and b parts exist
+                else if (str_b_part !== "") final_string += ` ${str_b_part}`; // Handles negative b
+            } else { // a is 0
+                final_string += `${formatNum(b)}`;
+            }
+            if (a !== 0 && b === 0 && str_a_part !== "") { // e.g. y = 2x
+                 // final_string already covers this
+            } else if (a === 0 && b === 0) { // y = 0
+                final_string = `y = 0`;
+            }
+            
             return {
                 func: x => a * x + b,
-                string: `y = ${formatNum(a)}x ${b >= 0 ? '+' : '-'} ${formatNum(Math.abs(b))}`,
+                string: final_string.replace(/\s\+\s0$/, '').replace(/\s-\s0$/, '').trim(), // Remove +0 or -0 at the end
                 coeffs: {a, b},
                 familyName: 'Lineal', familyId: 'linear'
             };
         }
 
-        function generateQuadratic() { 
-            let a = randomChoice([-2, -1, -0.5, -0.25, 0.25, 0.5, 1, 2]);
+        function generateQuadratic() {
+            let a = randomChoice([-2, -1, -0.5, -0.25, 0.25, 0.5, 1, 2].map(v=>formatNum(v,2)));
             let k = randomInt(-10, 10);
+            let str_k = k === 0 ? '' : (k > 0 ? `+ ${formatNum(Math.abs(k))}` : `- ${formatNum(Math.abs(k))}`);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
             return {
                 func: x => a * x * x + k,
-                string: `y = ${formatNum(a)}x${htmlSup('2')} ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                string: `y = ${str_a}x${htmlSup('2')} ${str_k}`.trim(),
                 coeffs: {a, k},
                 familyName: 'Cuadrática', familyId: 'quadratic'
             };
         }
-        
-        function generateCubic() { 
-            let a = randomChoice([-0.5, -0.2, -0.1, 0.1, 0.2, 0.5]);
+       
+        function generateCubic() {
+            let a = randomChoice([-0.5, -0.2, -0.1, 0.1, 0.2, 0.5].map(v=>formatNum(v,1)));
             let d = randomInt(-5, 5);
+            let str_d = d === 0 ? '' : (d > 0 ? `+ ${formatNum(Math.abs(d))}` : `- ${formatNum(Math.abs(d))}`);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
             return {
                 func: x => a * x*x*x + d,
-                string: `y = ${formatNum(a)}x${htmlSup('3')} ${d >= 0 ? '+' : '-'} ${formatNum(Math.abs(d))}`,
+                string: `y = ${str_a}x${htmlSup('3')} ${str_d}`.trim(),
                 coeffs: {a,d},
                 familyName: 'Cúbica', familyId: 'cubic'
             };
         }
 
-        function generateAbsolute() { 
-            let a = randomChoice([-3,-2,-1,-0.5,0.5,1,2,3]);
+        function generateAbsolute() {
+            let a = randomChoice([-3,-2,-1,-0.5,0.5,1,2,3].map(v=>formatNum(v,1)));
             let k = randomInt(-5, 5);
+            let str_k = k === 0 ? '' : (k > 0 ? `+ ${formatNum(Math.abs(k))}` : `- ${formatNum(Math.abs(k))}`);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
             return {
                 func: x => a * Math.abs(x) + k,
-                string: `y = ${formatNum(a)}|x| ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                string: `y = ${str_a}|x| ${str_k}`.trim(),
                 coeffs: {a,k},
                 familyName: 'Valor Absoluto', familyId: 'absolute'
             };
         }
 
-        function generateSqrt() { 
+        function generateSqrt() {
             let a = randomChoice([-3,-2,-1,1,2,3]);
             let k = randomInt(-5, 5);
+            let str_k = k === 0 ? '' : (k > 0 ? `+ ${formatNum(Math.abs(k))}` : `- ${formatNum(Math.abs(k))}`);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
             return {
                 func: x => {
                     if (x < 0) return NaN;
                     return a * Math.sqrt(x) + k;
                 },
-                string: `y = ${formatNum(a)}√x ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                string: `y = ${str_a}√x ${str_k}`.trim(),
                 coeffs: {a,k},
                 familyName: 'Raíz Cuadrada', familyId: 'sqrt'
             };
         }
-        
-        function generateExponential() { 
-            let a = randomChoice([-2,-1,-0.5,0.5,1,2]);
-            let b = randomChoice([0.5, 0.7, 1.5, 1.8, 2]); 
+       
+        function generateExponential() {
+            let a = randomChoice([-2,-1,-0.5,0.5,1,2].map(v=>formatNum(v,1)));
+            let b_val = randomChoice([0.5, 0.7, 1.5, 1.8, 2].map(v=>formatNum(v,1)));
             let c = randomInt(-5,5);
+            let str_c = c === 0 ? '' : (c > 0 ? `+ ${formatNum(Math.abs(c))}` : `- ${formatNum(Math.abs(c))}`);
+            
+            let string_a_mult = "";
+            if (a === 1) string_a_mult = ""; // y = b^x
+            else if (a === -1) string_a_mult = "-"; // y = -b^x
+            else if (a !== 0) string_a_mult = `${formatNum(a)} * `; // y = a * b^x
+            // If a is 0, the whole term a * b^x is 0.
+            
+            let final_string;
+            if (a === 0) { // y = c
+                final_string = `y = ${formatNum(c)}`;
+            } else {
+                final_string = `y = ${string_a_mult}${formatNum(b_val)}${htmlSup('x')} ${str_c}`.trim();
+            }
+
             return {
-                func: x => a * Math.pow(b, x) + c,
-                string: `y = ${formatNum(a)} * ${formatNum(b)}${htmlSup('x')} ${c >= 0 ? '+' : '-'} ${formatNum(Math.abs(c))}`,
-                coeffs: {a,b,c},
+                func: x => a * Math.pow(b_val, x) + c,
+                string: final_string,
+                coeffs: {a,b: b_val,c},
                 familyName: 'Exponencial', familyId: 'exponential'
             };
         }
 
-        function generateLogarithmic() { 
-            let a = randomChoice([-2,-1,-0.5,0.5,1,2]);
-            let base = randomChoice([2, Math.E, 3, 10]); 
+        function generateLogarithmic() {
+            let a = randomChoice([-2,-1,-0.5,0.5,1,2].map(v=>formatNum(v,1)));
+            let base = randomChoice([2, Math.E, 3, 10]);
             let k = randomInt(-5, 5);
-            const baseStr = base === Math.E ? 'e' : formatNum(base,1);
+            
+            const isNaturalLog = base === Math.E;
+            const isCommonLogExplicitBase = base === 10 && Math.random() < 0.3; // Sometimes show base 10 explicitly
+            const isCommonLogImplicitBase = base === 10 && !isNaturalLog && !isCommonLogExplicitBase;
+
+            let logSymbol;
+            let baseDisplay = "";
+
+            if (isNaturalLog) {
+                logSymbol = "ln";
+            } else if (isCommonLogImplicitBase) {
+                logSymbol = "log";
+            } else { // Other bases or explicit base 10
+                logSymbol = "log";
+                baseDisplay = htmlSub(formatNum(base,1));
+            }
+            
+            let str_k = k === 0 ? '' : (k > 0 ? `+ ${formatNum(Math.abs(k))}` : `- ${formatNum(Math.abs(k))}`);
+            let str_a = a === 1 ? '' : (a === -1 ? '-' : formatNum(a));
+            if (a === 0) str_a = '0'; // Should result in y = k
+
+            let final_string;
+            if (a === 0) {
+                final_string = `y = ${formatNum(k)}`;
+            } else {
+                final_string = `y = ${str_a}${logSymbol}${baseDisplay}(x) ${str_k}`.trim();
+            }
+
+
             return {
                 func: x => {
                     if (x <= 0) return NaN;
-                    if (base === Math.E) return a * Math.log(x) + k; // Math.log is natural log (ln)
+                    if (base === Math.E) return a * Math.log(x) + k;
                     return a * (Math.log(x) / Math.log(base)) + k;
                 },
-                string: `y = ${formatNum(a)}${base === Math.E ? 'ln' : 'log'}${htmlSub(base === Math.E ? '' : baseStr)}(x) ${k >= 0 ? '+' : '-'} ${formatNum(Math.abs(k))}`,
+                string: final_string,
                 coeffs: {a,base,k},
                 familyName: 'Logarítmica', familyId: 'logarithmic'
             };
         }
-        // generateSine and generateCosine are now helpers, called by generateTrigonometric.
-        // generateTrigonometric is in equationFamilies and sets final familyName/familyId.
+
 
         // --- Game Logic ---
         function populateFamilySelector() {
@@ -440,70 +515,76 @@
                 const label = document.createElement('label');
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                checkbox.value = family.id; // Use id for value
-                checkbox.checked = true; 
+                checkbox.value = family.id;
+                checkbox.checked = true;
                 checkbox.addEventListener('change', updateStartButtonState);
                 label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(" " + family.name)); // Use name for display
+                label.appendChild(document.createTextNode(" " + family.name));
                 familySelectorContainer.appendChild(label);
             });
-            updateStartButtonState(); 
+            updateStartButtonState();
         }
 
         function updateStartButtonState() {
             selectedFamilies = Array.from(familySelectorContainer.querySelectorAll('input[type="checkbox"]:checked'))
-                                  .map(cb => cb.value); // value is the family.id
+                                  .map(cb => cb.value);
             startGameButton.disabled = selectedFamilies.length === 0;
         }
 
-        function generateDistractors(correctFuncData, allSelectedFamilyIds) {
+        /**
+         * Generates distractor equations.
+         * All distractors will be from a different family than the correct answer.
+         * It will try to make distractor families unique from each other if possible.
+         */
+        function generateDistractors(correctFuncData, _allSelectedFamilyIds_unused_for_now) {
             const distractors = [];
-            const attemptsLimit = 30; 
-            let attempts = 0;
+            const correctFamilyId = correctFuncData.familyId;
 
-            const correctFamilyId = correctFuncData.familyId; // Use familyId here
-            const sameFamilyDetails = equationFamilies.find(f => f.id === correctFamilyId);
+            // Pool of all families *except* the correct one
+            let otherFamilyDetailsPool = equationFamilies.filter(f => f.id !== correctFamilyId);
+            shuffleArray(otherFamilyDetailsPool); // Randomize to pick different types of distractors
 
-            if (sameFamilyDetails) {
-                for (let i = 0; i < 2 && distractors.length < 4 && attempts < attemptsLimit; attempts++) {
-                    const distractor = sameFamilyDetails.generator(); // This will have its own familyId
-                    if (distractor.string !== correctFuncData.string && !distractors.some(d => d.string === distractor.string)) {
-                        distractors.push(distractor);
-                    }
-                }
-            }
-            
-            const otherFamilyIds = allSelectedFamilyIds.filter(fid => fid !== correctFamilyId);
-            const availableOtherFamilies = equationFamilies.filter(f => otherFamilyIds.includes(f.id));
+            const distractorStrings = new Set();
+            distractorStrings.add(correctFuncData.string); // Don't generate a distractor identical to correct
 
-            while (distractors.length < 4 && attempts < attemptsLimit) {
-                let familyToUseDetails;
-                if (availableOtherFamilies.length > 0 && (Math.random() < 0.7 || !sameFamilyDetails)) {
-                    familyToUseDetails = randomChoice(availableOtherFamilies);
-                } else if (sameFamilyDetails) {
-                    familyToUseDetails = sameFamilyDetails;
-                } else { 
-                    familyToUseDetails = randomChoice(equationFamilies.filter(f => allSelectedFamilyIds.includes(f.id))) || randomChoice(equationFamilies);
-                }
-                
-                if (!familyToUseDetails) { attempts++; continue; } 
+            // Try to get up to 4 distractors, ideally from unique families first
+            for (let i = 0; i < otherFamilyDetailsPool.length && distractors.length < 4; i++) {
+                const familyToUse = otherFamilyDetailsPool[i];
+                let distractor;
+                let attempts = 0;
+                const maxAttemptsPerFamily = 5; // Try a few times to get a unique string from this family
 
-                const distractor = familyToUseDetails.generator();
-                if (distractor.string !== correctFuncData.string && !distractors.some(d => d.string === distractor.string)) {
+                do {
+                    distractor = familyToUse.generator();
+                    attempts++;
+                } while (distractorStrings.has(distractor.string) && attempts < maxAttemptsPerFamily);
+
+                if (!distractorStrings.has(distractor.string)) {
                     distractors.push(distractor);
+                    distractorStrings.add(distractor.string);
                 }
-                attempts++;
             }
-            while(distractors.length < 4 && attempts < attemptsLimit * 2) {
-                 const fallbackFamilyDetails = randomChoice(equationFamilies.filter(f => allSelectedFamilyIds.includes(f.id))) || randomChoice(equationFamilies);
-                 if (!fallbackFamilyDetails) break;
-                 const distractor = fallbackFamilyDetails.generator();
-                 if (!distractors.some(d => d.string === distractor.string) && distractor.string !== correctFuncData.string) {
+
+            // If we still need more distractors (e.g., < 4 and ran out of unique families,
+            // or failed to generate unique strings from them),
+            // pick randomly from the `otherFamilyDetailsPool`, allowing family repetition among distractors.
+            let emergencyFillAttempts = 0;
+            while (distractors.length < 4 && otherFamilyDetailsPool.length > 0 && emergencyFillAttempts < 20) {
+                const familyToUse = randomChoice(otherFamilyDetailsPool); // Pick a random "other" family
+                const distractor = familyToUse.generator();
+
+                // Add if its string is new, or if we are desperate and it's not the correct answer
+                if (!distractorStrings.has(distractor.string)) {
                     distractors.push(distractor);
-                 }
-                 attempts++;
+                    distractorStrings.add(distractor.string);
+                } else if (distractors.length < 4 && distractor.string !== correctFuncData.string) {
+                    // String is a duplicate of another distractor, but we need to fill.
+                    // And it's not the correct answer.
+                    distractors.push(distractor); // Add it anyway
+                }
+                emergencyFillAttempts++;
             }
-            return distractors.slice(0,4);
+            return distractors; // Returns what it could generate, `generateQuestions` will ensure exactly 4 are used.
         }
 
 
@@ -514,54 +595,87 @@
                 alert("Por favor, selecciona al menos una familia de ecuaciones para empezar el juego.");
                 return;
             }
+             if (equationFamilies.length < 2 && availableFamilyObjects.length > 0) { // Needs at least 2 families *defined in the game*
+                 alert("Se necesitan al menos dos tipos de familias de ecuaciones definidas en el juego para que los distractores sean de un tipo diferente. Este juego parece no tener suficientes tipos de ecuaciones definidas.");
+                 startGameButton.disabled = true; // Disable start if this fundamental condition isn't met
+                 return;
+             }
+
 
             for (let i = 0; i < numQuestions; i++) {
-                const familyDetails = randomChoice(availableFamilyObjects); // This is {name, id, generator,...}
-                const mysteryFuncData = familyDetails.generator(); // This now contains familyName and familyId
+                const familyDetails = randomChoice(availableFamilyObjects);
+                const mysteryFuncData = familyDetails.generator();
+               
+                // Generate distractors using the new logic
+                let distractors = generateDistractors(mysteryFuncData, selectedFamilies); // selectedFamilies is not used by new func but kept for signature
                 
-                const distractors = generateDistractors(mysteryFuncData, selectedFamilies);
-                 while(distractors.length < 4) { // Ensure 4 distractors
-                    const fillFamily = randomChoice(availableFamilyObjects) || randomChoice(equationFamilies);
+                // Ensure we have enough distractors (aiming for 4).
+                // This loop will top up if generateDistractors returned < 4.
+                let topUpAttempts = 0;
+                const maxTopUpAttempts = 30; // Safety break
+                while(distractors.length < 4 && topUpAttempts < maxTopUpAttempts) {
+                    const potentialFillFamilies = equationFamilies.filter(f => f.id !== mysteryFuncData.familyId);
+                    
+                    if (potentialFillFamilies.length === 0) {
+                        console.error("No hay familias alternativas para generar distractores de relleno. Esto no debería suceder si hay >1 familia definida.");
+                        break; 
+                    }
+
+                    const fillFamily = randomChoice(potentialFillFamilies);
                     const dFill = fillFamily.generator();
-                    if (!distractors.some(d => d.string === dFill.string) && dFill.string !== mysteryFuncData.string) {
+                    
+                    let isDuplicateAmongDistractors = distractors.some(d => d.string === dFill.string);
+                    let isCorrectAnswer = dFill.string === mysteryFuncData.string;
+                    
+                    if (!isDuplicateAmongDistractors && !isCorrectAnswer) {
+                        distractors.push(dFill);
+                    } else if (distractors.length < 4 && !isCorrectAnswer) {
+                        // If it's a duplicate string *among distractors* but not the correct answer,
+                        // and we still need to fill, add it. This prioritizes family difference over string uniqueness among distractors.
                         distractors.push(dFill);
                     }
+                    topUpAttempts++;
                 }
                 
-                const options = [mysteryFuncData, ...distractors.slice(0,4)];
-                shuffleArray(options);
+                const finalDistractors = distractors.slice(0, 4); // Take the first 4.
                 
+                if (finalDistractors.length < 4) {
+                     console.warn(`Pregunta ${i+1}: No se pudieron generar 4 distractores únicos y diferentes de la familia correcta. Se mostrarán ${finalDistractors.length} distractores.`);
+                     // Game can proceed with fewer options if absolutely necessary, though UI expects 5 total (1 correct + 4 distractors).
+                     // If this happens, it might indicate very limited coefficient variety or too few family types overall.
+                }
+
+                const options = [mysteryFuncData, ...finalDistractors];
+                shuffleArray(options);
+               
                 questions.push({
                     mysteryFunctionData: mysteryFuncData,
                     options: options,
                     correctAnswerString: mysteryFuncData.string,
-                    // familyDetails is still the object from equationFamilies, used for defaultXRange etc.
-                    // mysteryFuncData.familyId and mysteryFuncData.familyName are inside mysteryFunctionData.
-                    familyDetailsForBounds: familyDetails 
+                    familyDetailsForBounds: familyDetails
                 });
             }
         }
-        
+       
         function calculateAxisBounds(mysteryFuncData, options, familyDetailsForBounds) {
             const functionsToConsider = [mysteryFuncData, ...options.filter(opt => opt && typeof opt.func === 'function')];
-            
+           
             let xDataMin, xDataMax;
-            // Use familyDetailsForBounds (the original object from equationFamilies) for default ranges
             if (typeof familyDetailsForBounds.defaultXRangeFn === 'function') {
                 [xDataMin, xDataMax] = familyDetailsForBounds.defaultXRangeFn(mysteryFuncData.coeffs);
             } else {
                 [xDataMin, xDataMax] = familyDetailsForBounds.defaultXRange || [-10, 10];
             }
 
-            if (xDataMin >= xDataMax) { 
-                xDataMin = -5; xDataMax = 5; 
+            if (xDataMin >= xDataMax) { // Fallback for invalid range
+                xDataMin = -5; xDataMax = 5;
                 if (familyDetailsForBounds.id === 'sqrt' ) { xDataMin = 0; xDataMax = 10; }
                 if (familyDetailsForBounds.id === 'logarithmic') { xDataMin = 0.01; xDataMax = 10; }
             }
 
             let allYValues = [];
-            const numSamplePoints = 200;
-            const dxInitial = (xDataMax - xDataMin) / numSamplePoints;
+            const numSamplePoints = 200; // Sample points across the initial x-range for Y auto-scaling
+            const dxInitial = (xDataMax - xDataMin) / Math.max(1, numSamplePoints); // Avoid division by zero if xDataMin=xDataMax
 
             for (const funcData of functionsToConsider) {
                 if (!funcData || typeof funcData.func !== 'function') continue;
@@ -572,58 +686,100 @@
                         if (!isNaN(y) && isFinite(y)) {
                             allYValues.push(y);
                         }
-                    } catch (e) { /* ignore */ }
+                    } catch (e) { /* ignore errors during sampling */ }
                 }
             }
-            
-            if (allYValues.length === 0) allYValues = [-5, 5]; 
+           
+            if (allYValues.length === 0) allYValues = [-5, 5]; // Default Y if no valid points found
 
             let yDataMin = Math.min(...allYValues);
             let yDataMax = Math.max(...allYValues);
 
-            if (yDataMin === yDataMax) { yDataMin -= 1; yDataMax += 1; }
+            if (yDataMin === yDataMax) { yDataMin -= 1; yDataMax += 1; } // Ensure some Y span
 
             const paddingFactor = 0.15; 
             let currentXSpan = xDataMax - xDataMin;
             let currentYSpan = yDataMax - yDataMin;
 
-            let xSpanDataPadded = currentXSpan === 0 ? 2 * (1 + 2 * paddingFactor) : currentXSpan * (1 + 2 * paddingFactor);
-            let ySpanDataPadded = currentYSpan === 0 ? 2 * (1 + 2 * paddingFactor) : currentYSpan * (1 + 2 * paddingFactor);
-            
+            // Ensure spans are not zero before padding
+            currentXSpan = currentXSpan === 0 ? 2 : currentXSpan;
+            currentYSpan = currentYSpan === 0 ? 2 : currentYSpan;
+
+            let xSpanDataPadded = currentXSpan * (1 + 2 * paddingFactor);
+            let ySpanDataPadded = currentYSpan * (1 + 2 * paddingFactor);
+           
             const xDataCenter = (xDataMin + xDataMax) / 2;
             const yDataCenter = (yDataMin + yDataMax) / 2;
-            
+           
             const canvasAspectRatio = canvas.width / canvas.height;
-            
+           
             let finalXSpan = xSpanDataPadded;
             let finalYSpan = ySpanDataPadded;
 
+            // Adjust span to fit canvas aspect ratio
             if (finalXSpan / finalYSpan > canvasAspectRatio) { 
                 finalYSpan = finalXSpan / canvasAspectRatio;
             } else { 
                 finalXSpan = finalYSpan * canvasAspectRatio;
             }
-            
+           
             axisBounds = {
                 xmin: xDataCenter - finalXSpan / 2,
                 xmax: xDataCenter + finalXSpan / 2,
                 ymin: yDataCenter - finalYSpan / 2,
                 ymax: yDataCenter + finalYSpan / 2,
             };
+            // Final sanity check on bounds
+            if (!Object.values(axisBounds).every(v => isFinite(v)) || axisBounds.xmin >= axisBounds.xmax || axisBounds.ymin >= axisBounds.ymax) {
+                console.warn("Calculated axis bounds are invalid, resetting to a safe default.", axisBounds);
+                let xFallbackMin = -10, xFallbackMax = 10;
+                if (typeof familyDetailsForBounds.defaultXRangeFn === 'function') {
+                    [xFallbackMin, xFallbackMax] = familyDetailsForBounds.defaultXRangeFn(mysteryFuncData.coeffs);
+                } else if (familyDetailsForBounds.defaultXRange) {
+                    [xFallbackMin, xFallbackMax] = familyDetailsForBounds.defaultXRange;
+                }
+                axisBounds.xmin = xFallbackMin; axisBounds.xmax = xFallbackMax;
+                
+                // Quick Y estimate for fallback
+                let yValsDefault = [];
+                const tempDx = (axisBounds.xmax - axisBounds.xmin) / 20 || 1;
+                for(let xPlot = axisBounds.xmin; xPlot <= axisBounds.xmax; xPlot += tempDx) {
+                    try {
+                        const yVal = mysteryFuncData.func(xPlot);
+                        if(isFinite(yVal)) yValsDefault.push(yVal);
+                    } catch(e){}
+                }
+                if(yValsDefault.length > 0) {
+                    axisBounds.ymin = Math.min(...yValsDefault) -1;
+                    axisBounds.ymax = Math.max(...yValsDefault) +1;
+                    if (axisBounds.ymin >= axisBounds.ymax) { axisBounds.ymin -=1; axisBounds.ymax +=1;}
+                } else {
+                    axisBounds.ymin = -10; axisBounds.ymax = 10;
+                }
+                 if (axisBounds.xmin >= axisBounds.xmax) {axisBounds.xmin = -10; axisBounds.xmax = 10;}
+                 if (axisBounds.ymin >= axisBounds.ymax) {axisBounds.ymin = -10; axisBounds.ymax = 10;}
+            }
         }
 
         function calculateNiceTicks(minVal, maxVal, maxTicks = 8) {
             const range = maxVal - minVal;
-            if (range === 0 || !isFinite(range)) return { ticks: [minVal], step: 0 };
+            if (!isFinite(range) || range < 0) { // Invalid range
+                 return { ticks: [minVal || 0], step: 1};
+            }
+            if (range === 0) return { ticks: [minVal], step: 0 };
+
 
             const roughStep = range / Math.max(1, (maxTicks - 1));
-            if (roughStep === 0 || !isFinite(roughStep)) return {ticks: [minVal, maxVal], step: range};
+            if (!isFinite(roughStep) || roughStep <=0 ) { // Invalid rough step
+                return {ticks: [minVal, maxVal], step: range || 1};
+            }
+
 
             const exponent = Math.floor(Math.log10(roughStep));
             const magnitude = Math.pow(10, exponent);
-            const possibleStepsMultipliers = [1, 2, 2.5, 5, 10]; 
-            
-            let niceStep = possibleStepsMultipliers[possibleStepsMultipliers.length-1] * magnitude;
+            const possibleStepsMultipliers = [1, 2, 2.5, 5, 10]; // Common "nice" multipliers
+           
+            let niceStep = possibleStepsMultipliers[possibleStepsMultipliers.length-1] * magnitude; // Default to largest
 
             for(let pStep of possibleStepsMultipliers) {
                 if (pStep * magnitude >= roughStep) {
@@ -631,20 +787,32 @@
                     break;
                 }
             }
-            if (niceStep === 0) niceStep = magnitude > 0 ? magnitude : 1;
+             if (!isFinite(niceStep) || niceStep <= 0) niceStep = (magnitude > 0 && isFinite(magnitude)) ? magnitude : 1; // Fallback for niceStep
 
-            const firstTick = Math.floor(minVal / niceStep) * niceStep;
+            const firstTickUnrounded = Math.floor(minVal / niceStep) * niceStep;
+            const firstTick = parseFloat(firstTickUnrounded.toFixed(10)); // Mitigate floating point issues
             const ticks = [];
             let currentTick = firstTick;
-            
-            const safetyMaxTicks = maxTicks * 3; 
-            while (currentTick < maxVal + niceStep * 0.1 && ticks.length < safetyMaxTicks) {
-                ticks.push(parseFloat(currentTick.toFixed(10))); 
+           
+            const safetyMaxTicksLoop = maxTicks * 3 + 5; // Generous safety for loop
+            // Add ticks as long as they are within or very near the extended range
+            while (currentTick < maxVal + niceStep * 0.5 && ticks.length < safetyMaxTicksLoop) {
+                ticks.push(parseFloat(currentTick.toFixed(10))); // Mitigate floating point issues for pushed ticks
                 currentTick += niceStep;
-                 if (niceStep === 0) break; 
+                 if (niceStep === 0) break; // Avoid infinite loop if step becomes 0
             }
-            if (ticks.length === 0 && isFinite(minVal) && isFinite(maxVal)) {
-                 ticks.push(formatNum(minVal), formatNum(maxVal));
+            
+            // Ensure at least two ticks if range is valid and non-zero
+            if (ticks.length < 2 && isFinite(minVal) && isFinite(maxVal) && minVal < maxVal) {
+                 ticks.length = 0; // Clear previous attempts if too few
+                 ticks.push(formatNum(minVal));
+                 ticks.push(formatNum(maxVal));
+                 ticks.sort((a,b) => a-b); // Ensure order
+                 // Remove duplicates that might arise from formatNum if minVal and maxVal are very close
+                 if (ticks.length > 1 && ticks[0] === ticks[1]) ticks.pop();
+            }
+            if (ticks.length === 0 && isFinite(minVal)) { // If all else fails, at least one tick
+                 ticks.push(formatNum(minVal));
             }
 
 
@@ -656,21 +824,23 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.font = '10px Arial';
 
-            const { xmin, xmax, ymin, ymax } = axisBounds;
-            if (![xmin, xmax, ymin, ymax].every(val => typeof val === 'number' && isFinite(val))) {
-                axisBounds = { xmin: -10, xmax: 10, ymin: -10, ymax: 10 }; 
+            let { xmin, xmax, ymin, ymax } = axisBounds; // Make mutable copies for local adjustments
+            if (![xmin, xmax, ymin, ymax].every(val => typeof val === 'number' && isFinite(val)) || xmin >= xmax || ymin >= ymax ) {
+                console.error("Invalid axis bounds for rendering:", axisBounds);
+                xmin = -10; xmax = 10; ymin = -10; ymax = 10; // Fallback to absolute default
+                axisBounds = {xmin, xmax, ymin, ymax}; // Update global if it was critically bad
             }
-            
-            const numXTicks = Math.max(3, Math.min(10, Math.floor(canvas.width / 60)));
-            const numYTicks = Math.max(3, Math.min(8, Math.floor(canvas.height / 50)));
+           
+            const numXTicks = Math.max(2, Math.min(10, Math.floor(canvas.width / 60)));
+            const numYTicks = Math.max(2, Math.min(8, Math.floor(canvas.height / 50)));
 
-            const xTicksData = calculateNiceTicks(axisBounds.xmin, axisBounds.xmax, numXTicks);
-            const yTicksData = calculateNiceTicks(axisBounds.ymin, axisBounds.ymax, numYTicks);
+            const xTicksData = calculateNiceTicks(xmin, xmax, numXTicks);
+            const yTicksData = calculateNiceTicks(ymin, ymax, numYTicks);
 
-            const toCanvasX = (mathX) => (mathX - axisBounds.xmin) / (axisBounds.xmax - axisBounds.xmin) * canvas.width;
-            const toCanvasY = (mathY) => canvas.height - (mathY - axisBounds.ymin) / (axisBounds.ymax - axisBounds.ymin) * canvas.height;
+            const toCanvasX = (mathX) => (mathX - xmin) / (xmax - xmin) * canvas.width;
+            const toCanvasY = (mathY) => canvas.height - (mathY - ymin) / (ymax - ymin) * canvas.height;
 
-            ctx.strokeStyle = '#eee';
+            ctx.strokeStyle = '#eee'; // Grid lines
             ctx.lineWidth = 1;
             xTicksData.ticks.forEach(tick => {
                 const xPos = toCanvasX(tick);
@@ -684,19 +854,19 @@
                     ctx.beginPath(); ctx.moveTo(0, yPos); ctx.lineTo(canvas.width, yPos); ctx.stroke();
                  }
             });
-            
-            ctx.strokeStyle = '#888';
+           
+            ctx.strokeStyle = '#888'; // Axis lines
             ctx.lineWidth = 1.5;
-            if (axisBounds.ymin <= 0 && axisBounds.ymax >= 0) { 
+            if (ymin <= 0 && ymax >= 0) { // Draw X-axis if 0 is in Y range
                 const yZero = toCanvasY(0);
                 if(isFinite(yZero)) {ctx.beginPath(); ctx.moveTo(0, yZero); ctx.lineTo(canvas.width, yZero); ctx.stroke();}
             }
-            if (axisBounds.xmin <= 0 && axisBounds.xmax >= 0) { 
+            if (xmin <= 0 && xmax >= 0) { // Draw Y-axis if 0 is in X range
                 const xZero = toCanvasX(0);
                 if(isFinite(xZero)) {ctx.beginPath(); ctx.moveTo(xZero, 0); ctx.lineTo(xZero, canvas.height); ctx.stroke();}
             }
 
-            ctx.fillStyle = '#555';
+            ctx.fillStyle = '#555'; // Tick labels
             const yAxisCanvasPos = toCanvasY(0); 
             
             ctx.textAlign = 'center';
@@ -708,65 +878,83 @@
 
                 if (yAxisCanvasPos > canvas.height - 15) { 
                     labelTextY = canvas.height - 2; ctx.textBaseline = 'bottom';
-                } else if (yAxisCanvasPos < 15) { 
+                } else if (yAxisCanvasPos < 15 && !(ymin <= 0 && ymax >=0)) { // If X-axis isn't drawn low
                     labelTextY = 2; ctx.textBaseline = 'top';
+                } else if (yAxisCanvasPos < 15) { // X-axis is drawn, label above it
+                     labelTextY = yAxisCanvasPos -2; ctx.textBaseline = 'bottom';
                 }
-                if(xPos >=-10 && xPos <= canvas.width + 10) { // Allow slightly off-canvas to catch edges
-                    ctx.fillText(formatNum(tick, tick.toString().includes('.') ? 1 : 0), xPos, labelTextY);
+
+                if(xPos >=-10 && xPos <= canvas.width + 10) { 
+                    const prec = (Math.abs(tick) < 0.1 && tick !== 0) ? 2 : ((Math.abs(tick) < 10 && tick !== 0 && (tick % 1 !== 0)) ? 1 : 0);
+                    ctx.fillText(formatNum(tick, prec), xPos, labelTextY);
                 }
             });
 
-            ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
             const xAxisCanvasPos = toCanvasX(0); 
             yTicksData.ticks.forEach(tick => {
                 const yPos = toCanvasY(tick);
                 if(!isFinite(yPos)) return;
                 let labelTextX = xAxisCanvasPos - 5;
+                ctx.textAlign = 'right';
 
-                if (xAxisCanvasPos < 25) { // Increased threshold for switching alignment
+                if (xAxisCanvasPos < 25 && !(xmin <= 0 && xmax >=0) ) { // Y-axis not drawn on left
                     labelTextX = 5; ctx.textAlign = 'left';
+                } else if (xAxisCanvasPos < 25) { // Y-axis drawn, label to its right
+                     labelTextX = xAxisCanvasPos + 5; ctx.textAlign = 'left';
                 } else if (xAxisCanvasPos > canvas.width - 25) {
                     labelTextX = canvas.width - 5; ctx.textAlign = 'right';
-                } else {
-                    ctx.textAlign = 'right'; // Default for y-axis labels left of axis
                 }
+                
                  if(yPos >= -10 && yPos <= canvas.height + 10){ 
-                    ctx.fillText(formatNum(tick, tick.toString().includes('.') ? 1 : 0), labelTextX, yPos);
+                    const prec = (Math.abs(tick) < 0.1 && tick !== 0) ? 2 : ((Math.abs(tick) < 10 && tick !== 0 && (tick % 1 !== 0)) ? 1 : 0);
+                    if (tick === 0 && (xmin > 0 || xmax < 0)) {} // Don't double-label origin if Y-axis is off-screen
+                    else ctx.fillText(formatNum(tick, prec), labelTextX, yPos);
                  }
             });
-            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; // Reset to defaults
         }
 
         function plotFunction(func, color) {
             const { xmin, xmax, ymin, ymax } = axisBounds;
-            if (![xmin, xmax, ymin, ymax].every(val => typeof val === 'number' && isFinite(val))) return;
+            if (![xmin, xmax, ymin, ymax].every(val => typeof val === 'number' && isFinite(val)) || xmin >= xmax || ymin >= ymax) {
+                 console.warn("Skipping plot due to invalid axis bounds:", axisBounds);
+                 return;
+            }
 
             ctx.beginPath();
             ctx.strokeStyle = color;
-            ctx.lineWidth = 2.5; 
+            ctx.lineWidth = 2.5;
 
-            const plotSteps = canvas.width * 2; 
+            const plotSteps = canvas.width * 2; // Number of segments to draw for the function plot
             const dx = (xmax - xmin) / plotSteps;
-            if (dx === 0 || !isFinite(dx)) return; // Avoid infinite loops or NaN issues
+            if (dx === 0 || !isFinite(dx)) {
+                console.warn("Skipping plot due to invalid dx (step size):", dx);
+                return;
+            }
 
             let firstPoint = true;
 
             for (let i = 0; i <= plotSteps; i++) {
                 const mathX = xmin + i * dx;
                 let mathY;
-                try { mathY = func(mathX); } catch(e) { mathY = NaN; }
-                
-                const yRangePlot = (ymax - ymin);
-                if (isNaN(mathY) || !isFinite(mathY) || mathY < ymin - yRangePlot || mathY > ymax + yRangePlot) { 
-                    firstPoint = true; 
+                try { mathY = func(mathX); } catch(e) { mathY = NaN; } // Catch errors from function execution
+               
+                // Define a plotting window slightly larger than the viewport to handle curves going off-screen smoothly
+                const yRangeViewport = ymax - ymin;
+                const yPlotMin = ymin - yRangeViewport * 0.5; // Allow some overshoot
+                const yPlotMax = ymax + yRangeViewport * 0.5;
+
+                if (isNaN(mathY) || !isFinite(mathY) || mathY < yPlotMin || mathY > yPlotMax) {
+                    // If point is NaN, infinite, or way off screen, start a new path segment
+                    firstPoint = true;
                     continue;
                 }
 
                 const canvasX = (mathX - xmin) / (xmax - xmin) * canvas.width;
                 const canvasY = canvas.height - (mathY - ymin) / (ymax - ymin) * canvas.height;
-                
-                 if (!isFinite(canvasX) || !isFinite(canvasY)) { // Additional check for canvas coords
+               
+                 if (!isFinite(canvasX) || !isFinite(canvasY)) { // Additional check for canvas coordinates
                     firstPoint = true;
                     continue;
                 }
@@ -784,21 +972,43 @@
         function loadQuestion(index) {
             currentQuestionIndex = index;
             const questionData = questions[index];
+            if (!questionData) {
+                console.error(`Error: No hay datos para la pregunta ${index}. Finalizando juego.`);
+                showEndScreen(); 
+                return;
+            }
+            if (!questionData.mysteryFunctionData || typeof questionData.mysteryFunctionData.func !== 'function') {
+                console.error(`Error: Función misteriosa inválida para la pregunta ${index}.`, questionData.mysteryFunctionData);
+                nextQuestion(); // Skip to next or end
+                return;
+            }
+
             currentMysteryFunction = questionData.mysteryFunctionData.func;
             correctAnswerString = questionData.correctAnswerString;
             currentOptions = questionData.options;
 
+            if (!currentOptions || currentOptions.length === 0) {
+                 console.error(`Error: No hay opciones para la pregunta ${index}. Ecuación correcta: ${correctAnswerString}`);
+                 nextQuestion(); 
+                 return;
+            }
+
+
             gameInfoDisplay.textContent = `Pregunta ${index + 1} de ${numQuestions} | Puntuación: ${score}/${index}`;
-            
+           
             calculateAxisBounds(questionData.mysteryFunctionData, questionData.options, questionData.familyDetailsForBounds);
             renderAxis();
             plotFunction(currentMysteryFunction, 'blue');
 
             optionsContainer.innerHTML = '';
             currentOptions.forEach(opt => {
+                if (!opt || typeof opt.string === 'undefined') { // Basic check for malformed option
+                    console.warn("Opción malformada encontrada y omitida:", opt, "en pregunta:", questionData);
+                    return; 
+                }
                 const button = document.createElement('button');
                 button.classList.add('option-button');
-                button.innerHTML = opt.string; 
+                button.innerHTML = opt.string; //innerHTML allows for <sup> etc.
                 button.dataset.equation = opt.string; 
                 button.addEventListener('click', () => selectOption(button, opt));
                 optionsContainer.appendChild(button);
@@ -828,14 +1038,15 @@
             const selectedEquationString = selectedOptionElement.dataset.equation;
             const chosenOptionData = currentOptions.find(opt => opt.string === selectedEquationString);
 
-            if (chosenOptionData && typeof chosenOptionData.func === 'function') {
-                 plotFunction(chosenOptionData.func, '#FF0000'); 
+            // Plot the chosen function in red if it's incorrect and is a plottable function
+            if (chosenOptionData && typeof chosenOptionData.func === 'function' && selectedEquationString !== correctAnswerString) {
+                 plotFunction(chosenOptionData.func, '#FF6347'); // Tomato red for incorrect choices
             }
 
             optionsContainer.querySelectorAll('.option-button').forEach(btn => {
-                btn.disabled = true; 
+                btn.disabled = true;
                 if (btn.dataset.equation === correctAnswerString) {
-                    btn.classList.add('correct'); 
+                    btn.classList.add('correct'); // Mark the correct button green
                 }
             });
 
@@ -843,22 +1054,21 @@
                 score++;
                 feedbackDisplay.textContent = "¡Correcto!";
                 feedbackDisplay.className = 'feedback-correct';
-                if (selectedOptionElement) selectedOptionElement.classList.add('correct');
-
+                // selectedOptionElement already marked 'correct' by the loop above if it was the right one
             } else {
                 feedbackDisplay.innerHTML = `Incorrecto. La respuesta correcta era: <span class="equation-text">${correctAnswerString}</span>`;
                 feedbackDisplay.className = 'feedback-incorrect';
-                 if (selectedOptionElement) {
-                    selectedOptionElement.classList.remove('selected');
-                    selectedOptionElement.classList.add('incorrect'); 
+                 if (selectedOptionElement) { // If an option was indeed selected
+                    selectedOptionElement.classList.remove('selected'); // remove general 'selected' style
+                    selectedOptionElement.classList.add('incorrect'); // add specific 'incorrect' style (red)
                  }
             }
-            
+           
             gameInfoDisplay.textContent = `Pregunta ${currentQuestionIndex + 1} de ${numQuestions} | Puntuación: ${score}/${currentQuestionIndex + 1}`;
             confirmAnswerButton.disabled = true;
             nextQuestionButton.style.display = 'inline-block';
         }
-        
+       
         function nextQuestion() {
             if (currentQuestionIndex < numQuestions - 1) {
                 loadQuestion(currentQuestionIndex + 1);
@@ -882,20 +1092,29 @@
             }
             currentScreen = screenId;
         }
-        
+       
         function resetGame() {
             score = 0;
             currentQuestionIndex = 0;
             questions = [];
+            // Re-populate selector and enable start button if families are checked
             populateFamilySelector(); 
+            // Start button state will be updated by populateFamilySelector's call to updateStartButtonState
         }
 
         startGameButton.addEventListener('click', () => {
             numQuestions = parseInt(numQuestionsSelector.value);
-            generateQuestions();
-            if (questions.length > 0) {
+            generateQuestions(); // This populates the `questions` array
+            if (questions.length > 0 && questions[0] && questions[0].options && questions[0].options.length > 0) {
                 loadQuestion(0);
                 showScreen('game');
+            } else if (questions.length === 0 && selectedFamilies.length > 0) {
+                 // This case implies generateQuestions failed silently or availableFamilyObjects was empty
+                 // but was not caught by earlier checks.
+                 alert("No se pudieron generar preguntas. Verifica la selección de familias o contacta al desarrollador.");
+            } else if (selectedFamilies.length === 0) {
+                // This case should be prevented by startGameButton.disabled state.
+                alert("Por favor, selecciona al menos una familia de ecuaciones.");
             }
         });
 
@@ -906,7 +1125,8 @@
             showScreen('main-menu');
         });
 
-        populateFamilySelector(); 
+        // Initialize
+        populateFamilySelector();
         showScreen('main-menu');
     </script>
 </body>
